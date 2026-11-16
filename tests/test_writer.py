@@ -1,17 +1,19 @@
 from unittest.mock import MagicMock
 
-from comex.models import Fluxo, Operacao
+from comex.models import EventoOperacao
 from comex.writers.volume_parquet import VolumeParquetWriter
 
-
-def _op(mes: int) -> Operacao:
-    return Operacao(Fluxo.EXPORTACAO, 2024, mes, "02071200", 160, "SC", 1, 10.0, 20.0)
+DIA_MS = 86_400_000
 
 
-def test_um_arquivo_por_particao():
+def test_um_arquivo_por_dia_do_evento(evento_cdc):
+    hoje = EventoOperacao.from_cdc(evento_cdc)
+    amanha = EventoOperacao.from_cdc(evento_cdc | {"__ts_ms": evento_cdc["__ts_ms"] + DIA_MS})
     cliente = MagicMock()
+
     caminhos = VolumeParquetWriter("/Volumes/comex/bronze/landing/", cliente).gravar(
-        [_op(1), _op(1), _op(2)])
+        [hoje, hoje, amanha])
+
     assert len(caminhos) == 2
-    assert caminhos[0].startswith("/Volumes/comex/bronze/landing/operacoes/fluxo=EXP/ano=2024/mes=01/")
+    assert caminhos[0].startswith("/Volumes/comex/bronze/landing/operacao/dt=2026-11-16/")
     assert cliente.files.upload.call_count == 2
