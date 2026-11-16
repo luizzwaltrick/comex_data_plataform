@@ -12,13 +12,20 @@ jobs:
       - run: ruff check .
       - run: pytest -q
 
+  docker:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t comex .
+      - run: docker run --rm comex --help
+
   terraform:
     runs-on: ubuntu-24.04
-    defaults: {run: {working-directory: infra/terraform}}
+    defaults: {run: {working-directory: infra/terraform/environments/prod}}
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
         with: {terraform_version: "1.9.8"}
-      - run: terraform fmt -check
+      - run: terraform fmt -check -recursive ../..
       - run: terraform init -backend=false
       - run: terraform validate
