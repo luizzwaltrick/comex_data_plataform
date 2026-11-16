@@ -1,0 +1,2 @@
+compartment_id = "ocid1.tenancy.oc1..xxxx"
+meu_ip_cidr    = "200.1.2.3/32"
