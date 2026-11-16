@@ -22,7 +22,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina no .env}
     command: ["postgres", "-c", "wal_level=logical"]
     volumes:
-      - ./sql/postgres:/docker-entrypoint-initdb.d
+      - ./postgres/init:/docker-entrypoint-initdb.d
       - pgdata:/var/lib/postgresql/data
 
   connect:
@@ -47,23 +47,15 @@ services:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
 
-  # Aplicação: rodar sob demanda ou pelo cron da VM.
-  #   docker compose run --rm produtor produzir exp --ano 2024
-  #   docker compose run --rm consumidor
-  produtor:
-    build: .
+  # Aplicação: roda sob demanda (make simular / make consumir) ou pelo cron da VM.
+  app:
+    build: ../..
     profiles: [app]
-    env_file: .env
-    environment: {KAFKA_BOOTSTRAP: "kafka:29092"}
-    depends_on: [kafka]
-
-  consumidor:
-    build: .
-    profiles: [app]
-    command: ["consumir"]
-    env_file: .env
-    environment: {KAFKA_BOOTSTRAP: "kafka:29092"}
-    depends_on: [kafka]
+    env_file: ../../.env
+    environment:
+      KAFKA_BOOTSTRAP: kafka:29092
+      POSTGRES_DSN: postgresql://comex:${POSTGRES_PASSWORD}@postgres:5432/comex
+    depends_on: [kafka, postgres]
 
 volumes:
   pgdata:
