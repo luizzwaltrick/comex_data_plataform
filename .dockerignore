@@ -2,4 +2,4 @@
 .venv
 tests
 infra
-databricks
+lakehouse
