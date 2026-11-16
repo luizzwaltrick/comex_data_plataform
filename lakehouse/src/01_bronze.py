@@ -1,10 +1,8 @@
 # Databricks notebook source
-# Bronze: Auto Loader lê incrementalmente os Parquet que o consumer Kafka gravou no Volume.
+# Bronze: histórico bruto dos eventos de CDC. O Auto Loader lê só os arquivos novos do Volume.
 catalogo = dbutils.widgets.get("catalogo")
-origem = f"/Volumes/{catalogo}/bronze/landing/operacoes/"
-checkpoint = f"/Volumes/{catalogo}/bronze/_checkpoints/operacoes"
-
-spark.sql(f"CREATE SCHEMA IF NOT EXISTS {catalogo}.bronze")
+origem = f"/Volumes/{catalogo}/bronze/landing/operacao/"
+checkpoint = f"/Volumes/{catalogo}/bronze/checkpoints/operacao"
 
 (spark.readStream.format("cloudFiles")
     .option("cloudFiles.format", "parquet")
@@ -14,4 +12,4 @@ spark.sql(f"CREATE SCHEMA IF NOT EXISTS {catalogo}.bronze")
     .writeStream
     .option("checkpointLocation", checkpoint)
     .trigger(availableNow=True)
-    .toTable(f"{catalogo}.bronze.operacoes"))
+    .toTable(f"{catalogo}.bronze.operacao_eventos"))
