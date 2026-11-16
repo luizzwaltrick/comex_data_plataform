@@ -44,13 +44,16 @@ class BaseComexExtractor(ABC):
             for linha in chunk.itertuples(index=False):
                 yield self._para_operacao(linha._asdict())
 
-    def extrair(self) -> Iterator[Operacao]:
-        yield from self.ler(self.baixar())
+    def extrair(self, limite: int | None = None) -> Iterator[Operacao]:
+        for i, op in enumerate(self.ler(self.baixar())):
+            if limite is not None and i >= limite:
+                return
+            yield op
 
     def _base(self, r: dict) -> dict:
         return {"fluxo": self.FLUXO, "ano": int(r["CO_ANO"]), "mes": int(r["CO_MES"]),
                     "co_ncm": str(r["CO_NCM"]).zfill(8), "co_pais": int(r["CO_PAIS"]),
-                    "sg_uf": r["SG_UF_NCM"], "co_via": int(r["CO_VIA"]),
+                    "sg_uf": r["SG_UF_NCM"], "co_via": int(r["CO_VIA"]), "co_urf": int(r["CO_URF"]),
                     "kg_liquido": float(r["KG_LIQUIDO"]), "vl_fob": float(r["VL_FOB"])}
 
     @abstractmethod
