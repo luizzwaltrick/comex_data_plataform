@@ -1,0 +1,25 @@
+[project]
+name = "comex"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+  "confluent-kafka>=2.5",
+  "pandas>=2.2",
+  "pyarrow>=17",
+  "databricks-sdk>=0.36",
+  "requests==2.32.3",
+  "pydantic-settings==2.5.2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==8.3.3", "ruff==0.6.9"]
+
+[tool.ruff]
+line-length = 100
+src = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
+[tool.ruff.lint.per-file-ignores]
+"databricks/**" = ["F821"]  # spark e dbutils são globais no runtime do Databricks
